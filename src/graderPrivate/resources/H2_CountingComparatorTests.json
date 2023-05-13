@@ -1,0 +1,44 @@
+{
+  "compareTest": [
+    {
+      "value1": 1,
+      "value2": 2
+    },
+    {
+      "value1": 3,
+      "value2": 3
+    },
+    {
+      "value1": -1,
+      "value2": -2
+    }
+  ],
+  "getComparisonsCountTest": [
+    {
+      "comparisons": 1
+    },
+    {
+      "comparisons": 2
+    },
+    {
+      "comparisons": 3
+    },
+    {
+      "comparisons": 0
+    }
+  ],
+  "resetTest": [
+    {
+      "comparisons": 1
+    },
+    {
+      "comparisons": 2
+    },
+    {
+      "comparisons": 3
+    },
+    {
+      "comparisons": 0
+    }
+  ]
+}

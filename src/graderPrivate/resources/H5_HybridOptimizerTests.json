@@ -1,0 +1,72 @@
+{
+  "sortCallTest": [
+    {
+      "values": [5,4,3,2,1],
+      "reads": [70,60,50,40,30,20,10],
+      "writes": [70,60,50,40,30,20,10],
+      "expectedCalls": 7
+    },
+    {
+      "values": [10,5,0],
+      "reads": [50,40,30,20,10],
+      "writes": [50,40,30,20,10],
+      "expectedCalls": 5
+    }
+  ],
+  "nonMonotoneTest": [
+    {
+      "values": [5,4,3],
+      "reads": [50,25,0,25,50],
+      "writes": [50,25,0,25,50],
+      "expected": 2
+    },
+    {
+      "values": [5,4,3,2],
+      "reads": [50,25,35, 5, 50, 100],
+      "writes": [5,25,10,10,50, 10],
+      "expected": 3
+    }
+  ],
+  "strictlyMonotoneTest": [
+    {
+      "values": [5,4,3],
+      "reads": [50,40,30,20,10],
+      "writes": [50,40,30,20,10],
+      "expected": 4
+    },
+    {
+      "values": [5,4,3,2],
+      "reads": [50,55,35,25,15,5],
+      "writes": [45,35,35,20,10,0],
+      "expected": 5
+    }
+  ],
+  "monotoneTest": [
+    {
+      "values": [5,4,3],
+      "reads": [50,40,30,20,20],
+      "writes": [50,40,30,20,20],
+      "expected": 4
+    },
+    {
+      "values": [5,4,3,2],
+      "reads": [50,55,35,35,15,5],
+      "writes": [45,35,55,55,10,0],
+      "expected": 5
+    }
+  ],
+  "globalNotLocalTest": [
+    {
+      "values": [5,4,3],
+      "reads": [50,40,45,20,10],
+      "writes": [50,40,45,20,10],
+      "expected": 1
+    },
+    {
+      "values": [5,4,3,2],
+      "reads": [50,45,35,40,40,5],
+      "writes": [45,50,35,30,40,0],
+      "expected": 3
+    }
+  ]
+}

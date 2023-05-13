@@ -1,0 +1,38 @@
+{
+  "swapWithoutBoundsTest": [
+    {
+      "values": [1,2,3,4,5]
+    }
+  ],
+  "swapWithBoundsTest": [
+    {
+      "values": [1,2,3,4,5],
+      "left": 0,
+      "right": 3
+    },
+    {
+      "values": [1,2,3,4,5],
+      "left": 1,
+      "right": 4
+    },
+    {
+      "values": [1,2,3,4,5],
+      "left": 1,
+      "right": 3
+    }
+  ],
+  "superCallTest": [
+    {
+      "values": [1,2,3,4,5],
+      "left": 0,
+      "right": 4,
+      "returnValue": 0
+    },
+    {
+      "values": [0,1,2,3,4],
+      "left": 1,
+      "right": 3,
+      "returnValue": 1
+    }
+  ]
+}

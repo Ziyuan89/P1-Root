@@ -1,0 +1,16 @@
+{
+  "valueTest": [
+    {
+      "color": "DIAMONDS",
+      "values": [2, 6, 9, 10, 3, 7, 13],
+      "expectedSorting": ["D2, D3, D6, D7, D9, D10, D13"]
+    }
+  ],
+  "colorTest": [
+    {
+      "colors": ["DIAMONDS", "SPADES", "HEARTS"],
+      "values": [2, 2, 2],
+      "expectedSorting": ["D2, H2, S2"]
+    }
+  ]
+}
