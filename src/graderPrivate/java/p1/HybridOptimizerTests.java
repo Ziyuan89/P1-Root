@@ -5,7 +5,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junitpioneer.jupiter.json.JsonClasspathSource;
 import org.junitpioneer.jupiter.json.Property;
+import org.mockito.ArgumentCaptor;
 import org.mockito.MockedConstruction;
+import org.mockito.stubbing.Answer;
 import org.sourcegrade.jagr.api.rubric.TestForSubmission;
 import org.tudalgo.algoutils.tutor.general.assertions.Context;
 import p1.sort.ArraySortList;
@@ -19,6 +21,7 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mockConstruction;
 import static org.mockito.Mockito.spy;
@@ -26,6 +29,7 @@ import static org.mockito.Mockito.when;
 import static org.tudalgo.algoutils.tutor.general.assertions.Assertions2.assertCallEquals;
 import static org.tudalgo.algoutils.tutor.general.assertions.Assertions2.assertEquals;
 import static org.tudalgo.algoutils.tutor.general.assertions.Assertions2.contextBuilder;
+import static org.tudalgo.algoutils.tutor.general.assertions.Assertions2.fail;
 
 @TestForSubmission
 public class HybridOptimizerTests {
@@ -46,6 +50,7 @@ public class HybridOptimizerTests {
         );
     }
 
+    @SuppressWarnings("unchecked")
     @ParameterizedTest
     @JsonClasspathSource(value = "H5_HybridOptimizerTests.json", data = "sortCallTest")
     public void testSortCall(@Property("values") List<Integer> values,
@@ -60,7 +65,8 @@ public class HybridOptimizerTests {
 
         AtomicInteger calls = new AtomicInteger(0);
 
-        doAnswer(invocation -> {
+        Answer<?> answer = invocation -> {
+
             SortList<Integer> sortList = invocation.getArgument(0);
 
             assertEquals(calls.get(), hybridSort.getK(), context,
@@ -77,17 +83,37 @@ public class HybridOptimizerTests {
 
             calls.incrementAndGet();
 
+            if (calls.get() > values.size() + 2) {
+                fail(context, TR -> "The sort() method was called more often than necessary in the worst case (array.length + 2).");
+            }
+
+
             return null;
-        }).when(hybridSort).sort(any());
+        };
+
+        ArgumentCaptor<Integer> quickSortLeftCaptor = ArgumentCaptor.forClass(Integer.class);
+        ArgumentCaptor<Integer> quickSortRightCaptor = ArgumentCaptor.forClass(Integer.class);
+
+        doAnswer(answer).when(hybridSort).sort(any());
+        doAnswer(answer).when(hybridSort).quickSort(any(), quickSortLeftCaptor.capture(), quickSortRightCaptor.capture());
 
         //noinspection rawtypes
         try (MockedConstruction<ArraySortList> ignored = mockConstruction(ArraySortList.class, (mock, creationContext) -> {
 
-            @SuppressWarnings("unchecked")
             SortList<Integer> sortList = (SortList<Integer>) mock;
+
+            Integer[] actualValues;
+
+            if (creationContext.arguments().get(0) instanceof Integer[] arr) {
+                actualValues = arr;
+            } else {
+                actualValues = ((List<Integer>) creationContext.arguments().get(0)).toArray(Integer[]::new);
+            }
 
             when(sortList.getReadCount()).thenAnswer(invocation -> calls.get() == 0 ? 0 : reads.get(calls.get() - 1));
             when(sortList.getWriteCount()).thenAnswer(invocation -> calls.get() == 0 ? 0 : writes.get(calls.get() - 1));
+            when(sortList.getSize()).thenReturn(values.size());
+            when(sortList.get(anyInt())).thenAnswer(invocation -> actualValues[(int) invocation.getArgument(0)]);
 
         })) {
             HybridOptimizer.optimize(hybridSort, values.toArray(Integer[]::new));
@@ -95,6 +121,17 @@ public class HybridOptimizerTests {
 
         assertEquals(expectedCalls, calls.get(), context,
             result -> "the amount of calls to the sort method is not correct.");
+
+        for (Integer leftValue : quickSortLeftCaptor.getAllValues()) {
+            assertEquals(0, leftValue, context,
+                result -> "the left value of the quickSort call is not correct.");
+        }
+
+        for (Integer rightValue : quickSortRightCaptor.getAllValues()) {
+            assertEquals(values.size() - 1, rightValue, context,
+                result -> "the right value of the quickSort call is not correct.");
+        }
+
     }
 
     @ParameterizedTest
@@ -166,6 +203,11 @@ public class HybridOptimizerTests {
                 calls.incrementAndGet();
                 return null;
             }).when(hybridSort).sort(any());
+
+            doAnswer(invocation -> {
+                calls.incrementAndGet();
+                return null;
+            }).when(hybridSort).quickSort(any(), anyInt(), anyInt());
 
             assertCallEquals(expected, () -> HybridOptimizer.optimize(hybridSort, values.toArray(Integer[]::new)), context,
                 result -> "The return value of the optimize() method is wrong.");
